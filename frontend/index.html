@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovAudit — Analisis Anggaran Website Pemerintah Indonesia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111318;
+    --bg3: #1a1d25;
+    --border: #2a2e3a;
+    --border2: #3a3f50;
+    --text: #e8eaf0;
+    --text2: #9099b0;
+    --text3: #5a6278;
+    --accent: #00d4ff;
+    --accent2: #0099bb;
+    --green: #00e676;
+    --yellow: #ffb300;
+    --red: #ff3d57;
+    --orange: #ff6b35;
+    --gold: #ffd700;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Space Mono', monospace;
+    --r: 6px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative; z-index: 10;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(10,12,16,0.95);
+    backdrop-filter: blur(10px);
+  }
+  .logo-mark {
+    width: 42px; height: 42px;
+    background: var(--accent);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700; font-size: 18px;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+  header h1 span { color: var(--accent); }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .header-badge {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* HERO SECTION */
+  .hero {
+    text-align: center;
+    padding: 60px 0 48px;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--accent2);
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h2 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .hero h2 .highlight {
+    color: var(--accent);
+    position: relative;
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 580px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  /* SEARCH PANEL */
+  .search-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px 32px;
+    max-width: 760px;
+    margin: 0 auto 48px;
+  }
+  .search-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .search-row {
+    display: flex; gap: 12px;
+  }
+  .url-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-input::placeholder { color: var(--text3); }
+  .url-input:focus { border-color: var(--accent); }
+  .btn-analyze {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--r);
+    padding: 14px 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-analyze:hover { background: #00eeff; }
+  .btn-analyze:active { transform: scale(0.98); }
+  .btn-analyze:disabled {
+    background: var(--border2);
+    color: var(--text3);
+    cursor: not-allowed;
+    transform: none;
+  }
+  .quick-links {
+    margin-top: 16px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    align-items: center;
+  }
+  .quick-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+  .quick-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LOADING STATE */
+  .loading-box {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .loading-box.active { display: block; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-steps {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .loading-step {
+    padding: 4px 0;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .loading-step.active { opacity: 1; color: var(--accent); }
+  .loading-step.done { opacity: 0.6; color: var(--green); }
+
+  /* RESULTS CONTAINER */
+  #results { display: none; }
+  #results.active { display: block; }
+
+  /* VERDICT BANNER */
+  .verdict-banner {
+    border-radius: var(--r);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start; gap: 20px;
+    border: 1px solid;
+  }
+  .verdict-banner.LEGIT {
+    background: rgba(0,230,118,0.06);
+    border-color: rgba(0,230,118,0.3);
+  }
+  .verdict-banner.SUSPICIOUS {
+    background: rgba(255,179,0,0.06);
+    border-color: rgba(255,179,0,0.3);
+  }
+  .verdict-banner.FRAUD {
+    background: rgba(255,61,87,0.08);
+    border-color: rgba(255,61,87,0.4);
+  }
+  .verdict-banner.INSUFFICIENT_DATA {
+    background: rgba(90,98,120,0.15);
+    border-color: var(--border);
+  }
+  .verdict-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .verdict-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .verdict-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .LEGIT .verdict-title { color: var(--green); }
+  .SUSPICIOUS .verdict-title { color: var(--yellow); }
+  .FRAUD .verdict-title { color: var(--red); }
+  .INSUFFICIENT_DATA .verdict-title { color: var(--text2); }
+  .verdict-desc { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+  /* GRID 3 COL */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 768px) { .grid-3 { grid-template-columns: 1fr; } }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+  }
+  .card-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* STAT CARD */
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    border-radius: 0 var(--r) 0 60px;
+    opacity: 0.08;
+  }
+  .stat-card.blue::after { background: var(--accent); }
+  .stat-card.green::after { background: var(--green); }
+  .stat-card.red::after { background: var(--red); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* BUDGET COMPARISON BAR */
+  .budget-compare {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .compare-row {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 16px;
+  }
+  .compare-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg3);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease;
+  }
+  .bar-fill.estimate { background: var(--accent); }
+  .bar-fill.actual-legit { background: var(--green); }
+  .bar-fill.actual-suspicious { background: var(--yellow); }
+  .bar-fill.actual-fraud { background: var(--red); }
+  .compare-amount {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    width: 150px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* FEATURES GRID */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .feature-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border: 1px solid;
+  }
+  .feature-chip.on {
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.25);
+    color: var(--accent);
+  }
+  .feature-chip.off {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text3);
+  }
+  .feature-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .feature-chip.on .feature-dot { background: var(--accent); }
+  .feature-chip.off .feature-dot { background: var(--text3); }
+
+  /* BUDGET BREAKDOWN TABLE */
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .breakdown-table tr { border-bottom: 1px solid var(--border); }
+  .breakdown-table tr:last-child { border-bottom: none; }
+  .breakdown-table td {
+    padding: 10px 0;
+    color: var(--text2);
+  }
+  .breakdown-table td:last-child {
+    text-align: right;
+    font-family: var(--font-mono);
+    color: var(--text);
+  }
+  .breakdown-table .total-row td {
+    padding-top: 14px;
+    color: var(--text);
+    font-weight: 600;
+    border-top: 1px solid var(--border2);
+  }
+  .breakdown-table .total-row td:last-child {
+    color: var(--accent);
+    font-size: 15px;
+  }
+
+  /* REFERENCES */
+  .ref-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .ref-package {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .ref-meta {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .ref-badge {
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .ref-badge.direct {
+    border-color: rgba(255,61,87,0.4);
+    color: var(--red);
+    background: rgba(255,61,87,0.08);
+  }
+  .ref-badge.tender {
+    border-color: rgba(0,230,118,0.3);
+    color: var(--green);
+    background: rgba(0,230,118,0.06);
+  }
+  .ref-amount {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .ref-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+  .ref-link:hover { text-decoration: underline; }
+
+  /* NOTES LIST */
+  .notes-list {
+    list-style: none;
+  }
+  .notes-list li {
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    line-height: 1.5;
+    display: flex; gap: 10px;
+  }
+  .notes-list li:last-child { border-bottom: none; }
+  .notes-list li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* TECH STACK PILLS */
+  .tech-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    margin: 3px;
+  }
+
+  /* CONFIDENCE BADGE */
+  .confidence-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .confidence-badge.High { background: rgba(0,230,118,0.15); color: var(--green); }
+  .confidence-badge.Medium { background: rgba(255,179,0,0.12); color: var(--yellow); }
+  .confidence-badge.Low { background: rgba(255,61,87,0.12); color: var(--red); }
+
+  /* DIVIDER */
+  .section-sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* METHODOLOGY FOOTER */
+  .methodology {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px 32px;
+    margin-top: 32px;
+  }
+  .methodology h3 {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  .method-item h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .method-item p {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  /* ERROR DISPLAY */
+  .error-box {
+    background: rgba(255,61,87,0.08);
+    border: 1px solid rgba(255,61,87,0.3);
+    border-radius: var(--r);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--red);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">GA</div>
+  <div>
+    <h1>Gov<span>Audit</span></h1>
+    <div class="header-sub">Indonesian Government Website Budget Analyzer</div>
+  </div>
+  <div class="header-badge">OPEN SOURCE INTELLIGENCE</div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-tag">🇮🇩 Transparansi Anggaran Digital</div>
+    <h2>Berapa <span class="highlight">Sebenarnya</span> Biaya<br>Website Pemerintah Ini?</h2>
+    <p>Analisis otomatis berbasis OSINT: teknologi, kompleksitas, estimasi pasar, dan perbandingan dengan anggaran pengadaan resmi dari SIRUP LKPP.</p>
+  </div>
+
+  <div class="search-panel">
+    <span class="search-label">🔍 Masukkan URL Website Pemerintah</span>
+    <div class="search-row">
+      <input type="text" class="url-input" id="urlInput"
+        placeholder="https://www.bgn.go.id/"
+        value="https://www.bgn.go.id/"
+      >
+      <button class="btn-analyze" id="analyzeBtn" onclick="startAnalysis()">
+        ANALISIS →
+      </button>
+    </div>
+    <div class="quick-links">
+      <span class="quick-label">Coba contoh:</span>
+      <button class="quick-btn" onclick="setUrl('https://www.bgn.go.id/')">bgn.go.id</button>
+      <button class="quick-btn" onclick="setUrl('https://www.kominfo.go.id/')">kominfo.go.id</button>
+      <button class="quick-btn" onclick="setUrl('https://www.kemkes.go.id/')">kemkes.go.id</button>
+      <button class="quick-btn" onclick="setUrl('https://www.bps.go.id/')">bps.go.id</button>
+      <button class="quick-btn" onclick="setUrl('https://jakarta.go.id/')">jakarta.go.id</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-box" id="loadingBox">
+    <div class="spinner"></div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">① Mengakses website target...</div>
+      <div class="loading-step" id="step2">② Mengidentifikasi teknologi & struktur...</div>
+      <div class="loading-step" id="step3">③ Menghitung estimasi biaya pasar...</div>
+      <div class="loading-step" id="step4">④ Mencari data pengadaan SIRUP/LPSE...</div>
+      <div class="loading-step" id="step5">⑤ Menjalankan analisis fraud detection...</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+
+  <!-- METHODOLOGY -->
+  <div class="methodology">
+    <h3>// METODOLOGI SISTEM</h3>
+    <div class="method-grid">
+      <div class="method-item">
+        <h4>🔬 Website Forensics</h4>
+        <p>Menganalisis HTML, headers HTTP, struktur navigasi, library JS, CMS, CDN, dan subdomain untuk fingerprint teknologi.</p>
+      </div>
+      <div class="method-item">
+        <h4>💰 Cost Estimation Model</h4>
+        <p>Model berbasis fitur: setiap komponen (CMS, API, login, peta, dll.) diberi bobot biaya berdasarkan rate pasar Indonesia 2024.</p>
+      </div>
+      <div class="method-item">
+        <h4>📊 Agency Multiplier</h4>
+        <p>Kementerian (2.5x), Badan (2.0x), Provinsi (1.6x), Kabupaten (1.3x) + overhead pengadaan pemerintah 35%.</p>
+      </div>
+      <div class="method-item">
+        <h4>🔍 Open Data Intelligence</h4>
+        <p>Pencarian otomatis di SIRUP LKPP, INAPROC, dan database pengadaan publik untuk menemukan anggaran aktual.</p>
+      </div>
+      <div class="method-item">
+        <h4>⚖️ Fraud Detection</h4>
+        <p>LEGIT (&lt;30% selisih) · SUSPICIOUS (30-50%) · FRAUD (&gt;50% selisih antara estimasi pasar vs anggaran pengadaan).</p>
+      </div>
+      <div class="method-item">
+        <h4>📋 Data Sources</h4>
+        <p>SIRUP LKPP · INAPROC · LPSE Nasional · BPS Salary Survey · APJII 2023 · Gartner SEA benchmarks.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API_URL = '/api/analyze';
+
+function setUrl(url) {
+  document.getElementById('urlInput').value = url;
+}
+
+function fmt(n) {
+  if (!n && n !== 0) return 'N/A';
+  if (n >= 1e12) return 'Rp ' + (n/1e12).toFixed(2) + ' T';
+  if (n >= 1e9) return 'Rp ' + (n/1e9).toFixed(2) + ' M';
+  if (n >= 1e6) return 'Rp ' + (n/1e6).toFixed(0) + ' jt';
+  return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+function fmtFull(n) {
+  if (!n && n !== 0) return 'N/A';
+  return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+async function startAnalysis() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+
+  const btn = document.getElementById('analyzeBtn');
+  const loading = document.getElementById('loadingBox');
+  const results = document.getElementById('results');
+
+  btn.disabled = true;
+  btn.textContent = 'MENGANALISIS...';
+  loading.classList.add('active');
+  results.classList.remove('active');
+  results.innerHTML = '';
+
+  // Animate loading steps
+  const steps = ['step1','step2','step3','step4','step5'];
+  let si = 0;
+  const stepInterval = setInterval(() => {
+    if (si > 0) document.getElementById(steps[si-1]).className = 'loading-step done';
+    if (si < steps.length) {
+      document.getElementById(steps[si]).className = 'loading-step active';
+      si++;
+    }
+  }, 900);
+
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await resp.json();
+
+    clearInterval(stepInterval);
+    steps.forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.className = 'loading-step done';
+    });
+
+    setTimeout(() => {
+      loading.classList.remove('active');
+      steps.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.className = 'loading-step';
+      });
+      renderResults(data);
+    }, 400);
+
+  } catch(err) {
+    clearInterval(stepInterval);
+    loading.classList.remove('active');
+    results.innerHTML = `<div class="error-box">❌ Error: ${err.message}</div>`;
+    results.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ANALISIS →';
+  }
+}
+
+function renderResults(d) {
+  const results = document.getElementById('results');
+
+  if (!d.success) {
+    results.innerHTML = `<div class="error-box">❌ Gagal menganalisis: ${d.error}</div>`;
+    results.classList.add('active');
+    return;
+  }
+
+  const fraud = d.fraud_analysis;
+  const est = d.budget_estimate;
+  const actual = d.actual_budget;
+  const metrics = d.metrics;
+  const tech = d.tech_stack;
+
+  const labelInfo = {
+    LEGIT: { icon:'✅', title:'LEGIT — Sesuai Pasar', color:'LEGIT', 
+      desc: `Anggaran aktual ${fraud.difference_pct}% dari estimasi pasar. Tidak ditemukan indikasi mark-up signifikan.` },
+    SUSPICIOUS: { icon:'⚠️', title:'SUSPICIOUS — Perlu Investigasi', color:'SUSPICIOUS',
+      desc: `Anggaran aktual ${fraud.difference_pct}% lebih ${actual.amount > est.total_estimated ? 'tinggi' : 'rendah'} dari estimasi pasar. Perlu audit lebih lanjut.` },
+    FRAUD: { icon:'🚨', title:'INDIKASI FRAUD — Mark-up Ekstrem', color:'FRAUD',
+      desc: `PERINGATAN: Selisih ${fraud.difference_pct}% jauh melebihi batas kewajaran (>50%). Anggaran pengadaan tidak proporsional dengan kompleksitas website.` },
+    INSUFFICIENT_DATA: { icon:'❓', title:'DATA TIDAK CUKUP', color:'INSUFFICIENT_DATA',
+      desc: 'Data anggaran aktual belum ditemukan di database SIRUP/LPSE. Analisis estimasi tetap tersedia.' },
+  };
+  const li = labelInfo[fraud.label] || labelInfo.INSUFFICIENT_DATA;
+
+  // Bar chart logic
+  const estAmt = est.total_estimated;
+  const actAmt = actual.amount;
+  const maxAmt = Math.max(estAmt, actAmt || 0) * 1.1 || estAmt;
+  const estPct = Math.round((estAmt / maxAmt) * 100);
+  const actPct = actAmt ? Math.round((actAmt / maxAmt) * 100) : 0;
+  const actBarClass = {
+    LEGIT: 'actual-legit',
+    SUSPICIOUS: 'actual-suspicious',
+    FRAUD: 'actual-fraud',
+    INSUFFICIENT_DATA: 'actual-legit'
+  }[fraud.label];
+
+  const featuresHtml = Object.entries(metrics.features || {}).map(([k,v]) => `
+    <div class="feature-chip ${v ? 'on' : 'off'}">
+      <span class="feature-dot"></span>${k}
+    </div>
+  `).join('');
+
+  const refsHtml = (actual.references || []).map(r => `
+    <div class="ref-item">
+      <div class="ref-package">${r.package}</div>
+      <div class="ref-meta">
+        <span class="ref-amount">${fmt(r.budget)}</span>
+        <span class="ref-badge ${r.method && r.method.includes('Langsung') ? 'direct' : 'tender'}">${r.method || 'N/A'}</span>
+        <span>${r.status || ''}</span>
+        ${r.url ? `<a href="${r.url}" target="_blank" class="ref-link">→ Sumber</a>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const notesHtml = (fraud.notes || []).length > 0
+    ? (fraud.notes || []).map(n => `<li>${n}</li>`).join('')
+    : '<li>Tidak ada catatan tambahan.</li>';
+
+  const techLibs = (tech.libraries || []).join(', ') || 'Tidak terdeteksi';
+  const subdomains = (metrics.subdomains || []).join(', ') || 'Tidak ada';
+
+  const breakdownRows = [
+    ['Design & UI/UX', est.design],
+    ['Frontend Development', est.frontend],
+    ['Backend Development', est.backend],
+    ['CMS Integration', est.cms],
+    ['Infrastructure & Hosting', est.infrastructure],
+    ['Content Migration', est.content],
+    ['Project Management (15%)', est.project_management],
+    ['Testing & QA (10%)', est.testing],
+  ].filter(([,v]) => v > 0).map(([label, val]) => `
+    <tr>
+      <td>${label}</td>
+      <td>${fmt(val)}</td>
+    </tr>
+  `).join('');
+
+  const breakdownNotesHtml = (est.notes || []).map(n => `<li>${n}</li>`).join('');
+
+  results.innerHTML = `
+    <!-- VERDICT BANNER -->
+    <div class="verdict-banner ${li.color}">
+      <div class="verdict-icon">${li.icon}</div>
+      <div>
+        <div class="verdict-label">${fraud.label.replace('_',' ')}</div>
+        <div class="verdict-title">${li.title}</div>
+        <div class="verdict-desc">${li.desc}</div>
+      </div>
+    </div>
+
+    <!-- KPI STATS -->
+    <div class="grid-3">
+      <div class="stat-card blue">
+        <div class="stat-label">Estimasi Pasar</div>
+        <div class="stat-value">${fmt(est.total_estimated)}</div>
+        <div class="stat-sub">Confidence: <span class="confidence-badge ${est.confidence}">${est.confidence}</span></div>
+      </div>
+      <div class="stat-card ${fraud.label === 'FRAUD' ? 'red' : 'green'}">
+        <div class="stat-label">Anggaran Aktual (SIRUP/LPSE)</div>
+        <div class="stat-value">${actAmt ? fmt(actAmt) : 'N/A'}</div>
+        <div class="stat-sub">${actual.source || 'Data tidak tersedia'}</div>
+      </div>
+      <div class="stat-card ${fraud.label === 'FRAUD' ? 'red' : (fraud.label === 'SUSPICIOUS' ? 'blue' : 'green')}">
+        <div class="stat-label">Selisih Anggaran</div>
+        <div class="stat-value">${fraud.difference_pct != null ? fraud.difference_pct + '%' : 'N/A'}</div>
+        <div class="stat-sub">Batas Fraud: &gt;50%</div>
+      </div>
+    </div>
+
+    <!-- BUDGET COMPARISON BAR -->
+    ${actAmt ? `
+    <div class="budget-compare">
+      <div class="card-title">Perbandingan Anggaran</div>
+      <div class="compare-row">
+        <span class="compare-label">Estimasi</span>
+        <div class="bar-track">
+          <div class="bar-fill estimate" style="width:${estPct}%"></div>
+        </div>
+        <span class="compare-amount">${fmt(estAmt)}</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">Aktual</span>
+        <div class="bar-track">
+          <div class="bar-fill ${actBarClass}" id="actualBar" style="width:0%"></div>
+        </div>
+        <span class="compare-amount">${fmt(actAmt)}</span>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- WEBSITE INFO + TECH STACK -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Informasi Website</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Agency</td><td style="text-align:right;color:var(--text)">${d.agency_name}</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Tipe</td><td style="text-align:right;color:var(--text);text-transform:capitalize">${d.agency_type}</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Kompleksitas</td><td style="text-align:right;color:var(--accent)">${d.complexity}</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Halaman Est.</td><td style="text-align:right;color:var(--text)">${metrics.pages_estimated}</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Nav Depth</td><td style="text-align:right;color:var(--text)">${metrics.nav_depth} level</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text3)">Subdomains</td><td style="text-align:right;color:var(--text);font-size:11px">${subdomains}</td></tr>
+          <tr><td style="padding:8px 0;color:var(--text3)">Load Time</td><td style="text-align:right;color:var(--text)">${d.load_time_ms}ms</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Tech Stack Detected</div>
+        <div style="margin-bottom:12px">
+          ${tech.framework ? `<span class="tech-pill">🔧 ${tech.framework}</span>` : ''}
+          ${tech.cms ? `<span class="tech-pill">📦 CMS: ${tech.cms}</span>` : ''}
+          ${tech.language ? `<span class="tech-pill">💻 ${tech.language}</span>` : ''}
+          ${tech.server ? `<span class="tech-pill">🖥 ${tech.server}</span>` : ''}
+          ${tech.cdn ? `<span class="tech-pill">🌐 CDN: ${tech.cdn}</span>` : ''}
+        </div>
+        <div class="card-title" style="margin-top:16px">Libraries</div>
+        <div style="font-size:12px;color:var(--text2);font-family:var(--font-mono)">${techLibs}</div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Fitur yang Terdeteksi</div>
+      <div class="features-grid">${featuresHtml}</div>
+    </div>
+
+    <!-- BUDGET BREAKDOWN -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Rincian Estimasi Biaya</div>
+        <table class="breakdown-table">
+          ${breakdownRows}
+          <tr class="total-row">
+            <td>TOTAL ESTIMASI</td>
+            <td>${fmt(est.total_estimated)}</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text3);font-size:12px">Maintenance/tahun (est.)</td>
+            <td style="color:var(--text3);font-size:12px">${fmt(est.annual_maintenance)}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- PROCUREMENT REFERENCES -->
+      <div class="card">
+        <div class="card-title">Data Pengadaan (SIRUP/LPSE)</div>
+        ${refsHtml || '<p style="font-size:13px;color:var(--text3)">Tidak ditemukan data pengadaan spesifik untuk website ini. Cek manual di: <a href="https://inaproc.lkpp.go.id" target="_blank" class="ref-link">inaproc.lkpp.go.id</a></p>'}
+      </div>
+    </div>
+
+    <!-- ANALYSIS NOTES -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Catatan Analisis & Temuan</div>
+      <ul class="notes-list">${notesHtml}</ul>
+    </div>
+
+    <!-- ESTIMATION NOTES -->
+    ${est.notes && est.notes.length > 0 ? `
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Log Kalkulasi</div>
+      <ul class="notes-list">${breakdownNotesHtml}</ul>
+    </div>
+    ` : ''}
+
+    <p style="text-align:center;font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:8px">
+      ⚠️ Disclaimer: Estimasi ini adalah analisis teknis berbasis model. Bukan pengganti audit resmi. Selalu verifikasi dengan data SIRUP/LPSE asli.
+    </p>
+  `;
+
+  results.classList.add('active');
+
+  // Animate actual bar
+  if (actAmt) {
+    setTimeout(() => {
+      const bar = document.getElementById('actualBar');
+      if (bar) bar.style.width = actPct + '%';
+    }, 300);
+  }
+}
+
+// Allow Enter key
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startAnalysis();
+});
+</script>
+</body>
+</html>
