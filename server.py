@@ -130,7 +130,7 @@ class GovBudgetHandler(BaseHTTPRequestHandler):
         }.get(ext, "application/octet-stream")
 
 
-def run(host: str = "0.0.0.0", port: int = 8080):
+def app(host: str = "0.0.0.0", port: int = 8080):
     server = HTTPServer((host, port), GovBudgetHandler)
     print(f"\n{'='*60}")
     print(f"  🇮🇩  GovBudget Analyzer — Indonesian Government Website Audit")
@@ -146,4 +146,4 @@ def run(host: str = "0.0.0.0", port: int = 8080):
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    run(port=port)
+    app(port=port)
