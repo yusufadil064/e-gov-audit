@@ -20,7 +20,8 @@ from backend.analyzers.orchestrator import Orchestrator
 
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from backend.analyzers.orchestrator import WebsiteAnalysisOrchestrator
 

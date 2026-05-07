@@ -5,7 +5,7 @@
     { "source": "/(.*)", "destination": "/frontend/$1" }
   ],
   "functions": {
-    "server.py": {
+    "api/server.py": {
       "runtime": "vercel-python@0.0.6"
     }
   }
