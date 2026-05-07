@@ -16,6 +16,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from flask import Flask, jsonify, request
+from backend.analyzers.orchestrator import Orchestrator
 
 
 # Add project root to path
@@ -146,13 +147,20 @@ def run(host: str = "0.0.0.0", port: int = 8080):
         server.server_close()
 
 
-app = FastAPI()
- 
-@app.get("/")
-def read_root():
-    return {"Python": "on Vercel"}
+app = Flask(__name__) # This is the "app" entrypoint Vercel is looking for
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze():
+    data = request.json
+    url = data.get('url')
+    
+    # Initialize your existing backend logic
+    orch = Orchestrator()
+    result = orch.run_pipeline(url)
+    
+    return jsonify(result)
 
 
-if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    run(port=port)
+# if __name__ == "__main__":
+#     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+#     run(port=port)

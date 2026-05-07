@@ -1,0 +1,5 @@
+flask
+requests
+beautifulsoup4
+pandas
+# Add other dependencies for your cost_estimation_engine
