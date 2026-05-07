@@ -15,6 +15,8 @@ import sys
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from flask import Flask, jsonify, request
+
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -142,6 +144,13 @@ def run(host: str = "0.0.0.0", port: int = 8080):
     except KeyboardInterrupt:
         print("\n\nServer stopped.")
         server.server_close()
+
+
+app = FastAPI()
+ 
+@app.get("/")
+def read_root():
+    return {"Python": "on Vercel"}
 
 
 if __name__ == "__main__":
