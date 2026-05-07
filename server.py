@@ -16,6 +16,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
+
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -130,7 +131,7 @@ class GovBudgetHandler(BaseHTTPRequestHandler):
         }.get(ext, "application/octet-stream")
 
 
-def app(host: str = "0.0.0.0", port: int = 8080):
+def run(host: str = "0.0.0.0", port: int = 8080):
     server = HTTPServer((host, port), GovBudgetHandler)
     print(f"\n{'='*60}")
     print(f"  🇮🇩  GovBudget Analyzer — Indonesian Government Website Audit")
@@ -146,4 +147,4 @@ def app(host: str = "0.0.0.0", port: int = 8080):
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    app(port=port)
+    run(port=port)
